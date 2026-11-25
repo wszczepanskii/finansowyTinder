@@ -1,5 +1,5 @@
 /** Adres HTTP backendu – po wdrożeniu na Render/Railway podmień na publiczny URL. */
-const BACKEND_HTTP_URL = "http://localhost:8000";
+const BACKEND_HTTP_URL = "https://finansowy-tinder-api.onrender.com/";
 
 /**
  * Zamienia adres HTTP backendu na WebSocket (ws:// / wss://).
