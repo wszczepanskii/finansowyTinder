@@ -9,20 +9,16 @@
   <script src="./config.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap" rel="stylesheet" />
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: {
-            display: ['"Archivo Black"', 'sans-serif'],
-            body: ['"Space Grotesk"', 'sans-serif'],
-          },
+          fontFamily: { sans: ['Nunito', 'sans-serif'] },
           colors: {
-            yellow: '#FDE047',
-            lilac: '#C4B5FD',
-            ink: '#111111',
-            paper: '#FFFFFF',
+            flame: '#FD297B',
+            coral: '#FF4458',
+            peach: '#FF6036',
           },
         },
       },
@@ -36,18 +32,24 @@
       touch-action: pan-y;
     }
     body {
-      font-family: "Space Grotesk", sans-serif;
-      background: #FDE047;
-      color: #111111;
+      font-family: Nunito, sans-serif;
+      background: #f6f7f8;
+      color: #21262e;
       min-height: 100dvh;
     }
-    .font-display { font-family: "Archivo Black", sans-serif; }
-    .brutal { border: 4px solid #111111; box-shadow: 6px 6px 0 #111111; }
-    .brutal-sm { border: 4px solid #111111; box-shadow: 3px 3px 0 #111111; }
     #app {
       height: 100dvh;
       max-height: 100dvh;
       overflow: hidden;
+    }
+    .logo-grad {
+      background: linear-gradient(135deg, #FD297B, #FF6036);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .btn-grad {
+      background: linear-gradient(135deg, #FD297B, #FF6036);
     }
     .card-stage {
       position: relative;
@@ -56,33 +58,24 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0.5rem 0.25rem 0.75rem;
+      padding: 0.25rem 0.5rem;
     }
-    .card-stack-bg {
+    .deck-shadow {
       position: absolute;
       left: 50%;
       top: 50%;
-      width: min(100%, 22rem);
-      height: min(52%, 15.5rem);
-      transform: translate(-50%, -50%);
+      width: min(100%, 22.5rem);
+      height: min(68%, 28rem);
+      transform: translate(-50%, -46%);
+      border-radius: 1.5rem;
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+      opacity: 0.55;
       pointer-events: none;
     }
-    .card-stack-bg::before,
-    .card-stack-bg::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: #C4B5FD;
-      border: 4px solid #111111;
-      box-shadow: 4px 4px 0 #111111;
-    }
-    .card-stack-bg::before {
-      transform: rotate(-5deg) translate(-6px, 4px);
-      background: #fff;
-    }
-    .card-stack-bg::after {
-      transform: rotate(4deg) translate(8px, -2px);
-      opacity: 0.85;
+    .deck-shadow.back {
+      transform: translate(-50%, -44%) scale(0.96);
+      opacity: 0.35;
     }
     .tinder-card {
       position: relative;
@@ -90,115 +83,117 @@
       touch-action: none;
       user-select: none;
       will-change: transform;
-      width: min(100%, 22rem);
-      max-height: min(48dvh, 17rem);
-      min-height: 11.5rem;
+      width: min(100%, 22.5rem);
+      height: min(68dvh, 30rem);
+      max-height: 32rem;
+      border-radius: 1.5rem;
+      background: #fff;
+      box-shadow:
+        0 2px 8px rgba(0,0,0,0.06),
+        0 18px 40px rgba(0,0,0,0.12);
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      background: #FFFFFF;
-      border: 4px solid #111111;
-      box-shadow: 8px 8px 0 #111111;
-      overflow: hidden;
     }
     .tinder-card.animating {
-      transition: transform 0.28s ease, opacity 0.28s ease;
+      transition: transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.28s ease;
     }
-    .tinder-card-accent {
-      height: 0.65rem;
-      background: linear-gradient(90deg, #C4B5FD 0%, #FDE047 100%);
-      border-bottom: 4px solid #111111;
+    .card-hero {
+      height: 38%;
+      min-height: 7.5rem;
+      background: linear-gradient(145deg, #FD297B 0%, #FF4458 45%, #FF6036 100%);
+      display: flex;
+      align-items: flex-end;
+      padding: 1rem 1.15rem;
+      position: relative;
       flex-shrink: 0;
     }
-    .tinder-card-body {
+    .card-hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,0.25), transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(255,255,255,0.12), transparent 35%);
+      pointer-events: none;
+    }
+    .card-body {
       flex: 1;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      padding: 1rem 1.1rem 1.15rem;
+      padding: 1.15rem 1.2rem 1.25rem;
       overflow: hidden;
-    }
-    .tinder-card-label {
-      display: inline-block;
-      align-self: flex-start;
-      background: #111111;
-      color: #FDE047;
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 0.28rem 0.55rem;
-      margin-bottom: 0.75rem;
-    }
-    .tinder-card-text {
-      font-family: "Archivo Black", sans-serif;
-      font-size: clamp(1rem, 3.8vw, 1.2rem);
-      line-height: 1.35;
-      letter-spacing: -0.01em;
-    }
-    .swipe-hint {
-      margin-top: 0.85rem;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: rgba(17, 17, 17, 0.4);
     }
     .stamp {
       position: absolute;
-      top: 22%;
-      padding: 0.3rem 0.65rem;
+      top: 18%;
+      padding: 0.35rem 0.7rem;
       border: 4px solid currentColor;
-      font-family: "Archivo Black", sans-serif;
-      font-size: 1.35rem;
-      letter-spacing: 0.06em;
-      background: rgba(255, 255, 255, 0.92);
-      transform: rotate(-12deg);
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 1.6rem;
+      letter-spacing: 0.08em;
+      background: rgba(255,255,255,0.92);
       opacity: 0;
       pointer-events: none;
-      z-index: 3;
+      z-index: 5;
     }
     .stamp-fakt {
-      left: 10%;
-      color: #16a34a;
+      left: 12%;
+      color: #2dd36f;
+      transform: rotate(-18deg);
     }
     .stamp-pulapka {
-      right: 10%;
-      color: #dc2626;
-      transform: rotate(12deg);
+      right: 12%;
+      color: #FD297B;
+      transform: rotate(18deg);
     }
-    .play-btn {
-      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    .action-btn {
+      width: 4rem;
+      height: 4rem;
+      border-radius: 9999px;
+      background: #fff;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      border: none;
     }
-    .play-btn:active:not(:disabled) {
-      transform: translate(2px, 2px);
-      box-shadow: 1px 1px 0 #111111;
+    .action-btn:active:not(:disabled) {
+      transform: scale(0.92);
     }
-    .lock-screen {
+    .action-btn:disabled { opacity: 0.4; }
+    .action-btn.nope { color: #FD297B; }
+    .action-btn.like { color: #2dd36f; width: 4.5rem; height: 4.5rem; }
+    .soft-input {
+      width: 100%;
+      border-radius: 9999px;
+      border: 1.5px solid #eceff1;
+      background: #fff;
+      padding: 0.9rem 1.25rem;
+      font-weight: 700;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .soft-input:focus {
+      border-color: #FD297B;
+      box-shadow: 0 0 0 3px rgba(253, 41, 123, 0.15);
+    }
+    .lock-screen, .ok-toast {
       position: fixed;
       inset: 0;
       z-index: 50;
-      background: #dc2626;
-      color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 1.5rem;
       text-align: center;
-    }
-    .ok-toast {
-      position: fixed;
-      inset: 0;
-      z-index: 40;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: #16a34a;
       color: #fff;
-      padding: 1.5rem;
-      text-align: center;
     }
+    .lock-screen { background: rgba(253, 41, 123, 0.96); }
+    .ok-toast { background: rgba(45, 211, 111, 0.96); z-index: 40; }
     @keyframes pulse-soft {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.55; }
@@ -209,105 +204,98 @@
 <body>
   <div id="app" class="flex flex-col px-4 py-3 max-w-lg mx-auto w-full">
 
-    <!-- 1. DOŁĄCZANIE -->
+    <!-- JOIN -->
     <section v-if="stage === 'join'" class="flex-1 flex flex-col justify-center overflow-hidden">
-      <a
-        href="./index.html"
-        class="inline-block brutal-sm bg-paper px-3 py-2 mb-4 font-bold uppercase text-xs w-fit"
-      >
-        ← Strona główna
-      </a>
-      <p class="font-bold uppercase tracking-widest text-xs mb-2">OFFLINE STUDIO CHALLENGE</p>
-      <h1 class="font-display text-3xl leading-none uppercase mb-6">
-        Finansowy Tinder
-      </h1>
+      <a href="./index.html" class="text-flame font-bold text-sm mb-5 w-fit">← Strona główna</a>
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-12 h-12 rounded-full btn-grad flex items-center justify-center shadow-lg shadow-pink-200">
+          <svg viewBox="0 0 24 24" class="w-6 h-6 text-white fill-current"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </div>
+        <div>
+          <h1 class="text-3xl font-extrabold logo-grad leading-none">Finansowy Tinder</h1>
+          <p class="text-gray-400 font-bold text-sm">Dołącz do pokoju</p>
+        </div>
+      </div>
 
-      <label class="block text-sm font-bold uppercase mb-1">PIN pokoju</label>
+      <label class="block text-xs font-extrabold uppercase tracking-wider text-gray-400 mb-2 ml-1">PIN pokoju</label>
       <input
         v-model="pinInput"
         maxlength="4"
         inputmode="numeric"
         pattern="[0-9]*"
-        class="brutal-sm bg-paper w-full px-4 py-3 mb-4 text-center font-display text-3xl tracking-[0.35em] outline-none"
+        class="soft-input text-center text-3xl tracking-[0.35em] mb-4"
         placeholder="0000"
       />
 
-      <label class="block text-sm font-bold uppercase mb-1">Twój nick (max 16)</label>
+      <label class="block text-xs font-extrabold uppercase tracking-wider text-gray-400 mb-2 ml-1">Nick (max 16)</label>
       <input
         v-model="nickInput"
         maxlength="16"
-        class="brutal-sm bg-paper w-full px-4 py-3 mb-4 outline-none font-bold"
+        class="soft-input mb-5"
         placeholder="np. Ania"
         @keyup.enter="join"
       />
 
-      <p v-if="formError" class="brutal-sm bg-red-600 text-white px-3 py-2 mb-4 text-sm font-bold">
+      <p v-if="formError" class="mb-4 rounded-2xl bg-pink-50 text-flame px-4 py-3 text-sm font-bold">
         {{ formError }}
       </p>
 
       <button
         @click="join"
         :disabled="joining"
-        class="brutal bg-lilac w-full py-4 font-display text-xl uppercase disabled:opacity-50"
+        class="btn-grad w-full py-3.5 rounded-full text-white font-extrabold text-lg shadow-lg shadow-pink-200 disabled:opacity-50"
       >
         {{ joining ? 'Łączenie…' : 'Dołącz do gry' }}
       </button>
     </section>
 
-    <!-- 2. POCZEKALNIA -->
+    <!-- WAITING -->
     <section v-else-if="stage === 'waiting'" class="flex-1 flex flex-col justify-center overflow-hidden">
-      <button
-        type="button"
-        @click="goHome"
-        class="brutal-sm bg-paper px-3 py-2 mb-4 font-bold uppercase text-xs w-fit"
-      >
-        ← Strona główna
-      </button>
-      <p class="waiting font-display text-2xl uppercase leading-tight mb-3">
-        Jesteś w grze, {{ nick }}!
-      </p>
-      <p class="font-medium mb-8">Czekamy na start prowadzącego...</p>
+      <button type="button" @click="goHome" class="text-flame font-bold text-sm mb-5 w-fit">← Strona główna</button>
+      <p class="waiting text-3xl font-extrabold logo-grad mb-2">Cześć, {{ nick }}!</p>
+      <p class="text-gray-500 font-bold mb-8">Czekamy, aż prowadzący kliknie Start…</p>
 
-      <div class="brutal bg-paper p-5 space-y-4 mb-4">
-        <p class="font-display text-sm uppercase tracking-wide">Ściągawka</p>
+      <div class="rounded-3xl bg-white p-5 shadow-md shadow-pink-100 mb-4 space-y-4">
+        <p class="font-extrabold text-sm text-gray-400 uppercase tracking-wide">Jak swipe’ować</p>
         <div class="flex items-center gap-3">
-          <span class="brutal-sm bg-red-500 text-white px-3 py-2 font-display text-sm shrink-0">← LEWO</span>
-          <span class="font-bold">= PUŁAPKA</span>
+          <span class="w-12 h-12 rounded-full bg-white shadow flex items-center justify-center text-flame text-2xl font-extrabold border border-pink-100">✕</span>
+          <div>
+            <p class="font-extrabold">W lewo = PUŁAPKA</p>
+            <p class="text-sm text-gray-400 font-medium">Jak „Nope” na Tinderze</p>
+          </div>
         </div>
         <div class="flex items-center gap-3">
-          <span class="brutal-sm bg-green-500 text-white px-3 py-2 font-display text-sm shrink-0">PRAWO →</span>
-          <span class="font-bold">= FAKT</span>
+          <span class="w-12 h-12 rounded-full bg-white shadow flex items-center justify-center text-emerald-400 text-2xl border border-emerald-100">♥</span>
+          <div>
+            <p class="font-extrabold">W prawo = FAKT</p>
+            <p class="text-sm text-gray-400 font-medium">Jak „Like”</p>
+          </div>
         </div>
-        <p class="text-sm text-ink/70">Przesuń kartę albo użyj przycisków.</p>
       </div>
 
-      <button
-        @click="leaveRoom"
-        class="brutal-sm bg-paper w-full py-3 font-bold uppercase text-sm"
-      >
+      <button @click="leaveRoom" class="w-full py-3 rounded-full font-bold text-sm text-gray-500 bg-white border border-gray-100">
         Zmień pokój / PIN
       </button>
     </section>
 
-    <!-- 3. ROZGRYWKA -->
+    <!-- PLAY -->
     <section v-else-if="stage === 'play'" class="flex-1 flex flex-col min-h-0 overflow-hidden">
-      <header class="flex items-center justify-between gap-2 mb-2 shrink-0">
-        <div class="brutal-sm bg-paper px-3 py-2">
-          <p class="text-[0.65rem] font-bold uppercase tracking-widest text-ink/50">Postęp</p>
-          <p class="font-display text-sm leading-none mt-0.5">Karta {{ Math.min(answered + 1, total) }} / {{ total }}</p>
-          <div class="mt-1.5 h-2.5 w-28 border-[3px] border-black bg-lilac/25 overflow-hidden">
-            <div class="h-full bg-lilac" :style="{ width: progressPct + '%' }"></div>
+      <header class="flex items-center justify-between gap-3 mb-2 shrink-0 px-1">
+        <div>
+          <p class="text-[0.65rem] font-extrabold uppercase tracking-wider text-gray-400">Karta {{ Math.min(answered + 1, total) }} / {{ total }}</p>
+          <div class="mt-1.5 h-1.5 w-32 rounded-full bg-gray-200 overflow-hidden">
+            <div class="h-full rounded-full btn-grad" :style="{ width: progressPct + '%' }"></div>
           </div>
         </div>
-        <div class="brutal-sm bg-lilac px-3 py-2 text-right min-w-[5.5rem]">
-          <p class="font-display text-2xl leading-none">{{ score }}</p>
-          <p class="text-[0.65rem] font-bold uppercase">pkt</p>
-          <p v-if="streak > 0" class="text-xs font-bold mt-1">🔥 {{ streak }}</p>
+        <div class="text-right">
+          <p class="text-2xl font-extrabold logo-grad leading-none">{{ score }}</p>
+          <p class="text-[0.65rem] font-extrabold uppercase text-gray-400">pkt <span v-if="streak > 0">· 🔥{{ streak }}</span></p>
         </div>
       </header>
 
       <div class="card-stage">
-        <div class="card-stack-bg" aria-hidden="true"></div>
+        <div class="deck-shadow back" aria-hidden="true"></div>
+        <div class="deck-shadow" aria-hidden="true"></div>
         <div
           class="tinder-card"
           :class="{ animating: cardAnimating }"
@@ -317,11 +305,17 @@
           @touchend.prevent="onPointerUp"
           @mousedown.prevent="onPointerDown"
         >
-          <div class="tinder-card-accent"></div>
-          <div class="tinder-card-body">
-            <span class="tinder-card-label">Twierdzenie</span>
-            <p class="tinder-card-text">{{ currentCard ? currentCard.statement : '' }}</p>
-            <p class="swipe-hint">← pułapka · fakt →</p>
+          <div class="card-hero">
+            <div class="relative z-10">
+              <p class="text-white/80 text-xs font-extrabold uppercase tracking-wider">Twierdzenie</p>
+              <p class="text-white font-extrabold text-lg leading-tight mt-0.5">Fakt czy pułapka?</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <p class="text-[1.15rem] sm:text-xl font-extrabold leading-snug flex-1">
+              {{ currentCard ? currentCard.statement : '' }}
+            </p>
+            <p class="text-xs font-bold text-gray-300 uppercase tracking-wide mt-3">Przesuń kartę ← / →</p>
           </div>
 
           <div class="stamp stamp-fakt" :style="{ opacity: stampFakt }">FAKT</div>
@@ -329,44 +323,46 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-3 shrink-0 pb-[env(safe-area-inset-bottom)]">
+      <div class="flex items-center justify-center gap-8 shrink-0 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <button
-          @click="submitAnswer(false)"
+          @click="tapNope"
           :disabled="busy"
-          class="play-btn brutal-sm bg-red-500 text-white py-3.5 font-display text-base uppercase disabled:opacity-40"
+          class="action-btn nope"
+          aria-label="Pułapka"
         >
-          ❌ Pułapka
+          <svg viewBox="0 0 24 24" class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
         </button>
         <button
-          @click="submitAnswer(true)"
+          @click="tapLike"
           :disabled="busy"
-          class="play-btn brutal-sm bg-green-500 text-white py-3.5 font-display text-base uppercase disabled:opacity-40"
+          class="action-btn like"
+          aria-label="Fakt"
         >
-          ✅ Fakt
+          <svg viewBox="0 0 24 24" class="w-9 h-9 fill-current"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
         </button>
       </div>
     </section>
 
-    <!-- 4. EKRAN KOŃCOWY -->
+    <!-- FINISHED -->
     <section v-else-if="stage === 'finished'" class="flex-1 flex flex-col justify-center overflow-hidden text-center">
-      <p class="font-bold uppercase tracking-widest text-xs mb-2">Koniec talii</p>
-      <h2 class="font-display text-4xl uppercase mb-6">Brawo, {{ nick }}!</h2>
+      <p class="text-flame font-extrabold text-sm uppercase tracking-wide mb-2">It's a wrap</p>
+      <h2 class="text-4xl font-extrabold logo-grad mb-6">Brawo, {{ nick }}!</h2>
 
-      <div class="brutal bg-paper p-5 mb-4 text-left space-y-3">
+      <div class="rounded-3xl bg-white p-5 mb-4 text-left shadow-md shadow-pink-100 space-y-3">
         <div class="flex justify-between items-baseline">
-          <span class="font-bold">Punkty</span>
-          <span class="font-display text-3xl">{{ score }}</span>
+          <span class="font-bold text-gray-400">Punkty</span>
+          <span class="text-3xl font-extrabold text-flame">{{ score }}</span>
         </div>
         <div class="flex justify-between items-baseline">
-          <span class="font-bold">Czas</span>
-          <span class="font-display text-xl">{{ formatTime(finishSeconds) }}</span>
+          <span class="font-bold text-gray-400">Czas</span>
+          <span class="text-xl font-extrabold">{{ formatTime(finishSeconds) }}</span>
         </div>
         <div v-if="finishBonus > 0" class="flex justify-between items-baseline">
-          <span class="font-bold">Bonus podium {{ finishPlace ? '#' + finishPlace : '' }}</span>
-          <span class="font-display text-xl text-green-700">+{{ finishBonus }}</span>
+          <span class="font-bold text-gray-400">Bonus podium {{ finishPlace ? '#' + finishPlace : '' }}</span>
+          <span class="text-xl font-extrabold text-emerald-500">+{{ finishBonus }}</span>
         </div>
-        <div v-if="finishPlace && finishPlace <= 3" class="pt-2 border-t-4 border-black">
-          <p class="font-display text-2xl">
+        <div v-if="finishPlace && finishPlace <= 3" class="pt-3 border-t border-pink-50">
+          <p class="font-extrabold text-2xl">
             <span v-if="finishPlace === 1">🥇</span>
             <span v-else-if="finishPlace === 2">🥈</span>
             <span v-else>🥉</span>
@@ -375,34 +371,27 @@
         </div>
       </div>
 
-      <p class="font-medium text-ink/80">
-        Spójrz na ekran główny, aby zobaczyć pełny ranking!
-      </p>
-      <p class="text-sm text-ink/50 mt-4 mb-4">Czekaj na rewanż od prowadzącego…</p>
-      <button
-        @click="leaveRoom"
-        class="brutal-sm bg-paper w-full py-3 font-bold uppercase text-sm"
-      >
+      <p class="font-bold text-gray-500">Spójrz na ekran główny, aby zobaczyć pełny ranking!</p>
+      <p class="text-sm font-medium text-gray-400 mt-2 mb-4">Czekaj na rewanż od prowadzącego…</p>
+      <button @click="leaveRoom" class="w-full py-3 rounded-full font-bold text-sm text-gray-500 bg-white border border-gray-100">
         Dołącz do innego pokoju
       </button>
     </section>
 
-    <!-- Poprawna odpowiedź – 0.8s -->
     <div v-if="okFeedback" class="ok-toast">
-      <p class="font-display text-4xl mb-3">{{ okFeedback.pointsLabel }}</p>
-      <div class="brutal bg-paper text-ink p-4 max-w-sm">
-        <p class="text-xs font-bold uppercase mb-1">Wyjaśnienie</p>
-        <p class="font-medium leading-snug">{{ okFeedback.explanation }}</p>
+      <p class="text-4xl font-extrabold mb-3">{{ okFeedback.pointsLabel }}</p>
+      <div class="rounded-2xl bg-white text-gray-800 p-4 max-w-sm shadow-xl">
+        <p class="text-xs font-extrabold uppercase text-emerald-500 mb-1">Wyjaśnienie</p>
+        <p class="font-bold leading-snug">{{ okFeedback.explanation }}</p>
       </div>
     </div>
 
-    <!-- Blokada po błędzie – 2s -->
     <div v-if="lockFeedback" class="lock-screen">
-      <p class="font-display text-5xl tabular-nums mb-2">{{ lockFeedback.countdown.toFixed(1) }}s...</p>
-      <p class="font-display text-3xl mb-4">-50 pkt! PUŁAPKA!</p>
-      <div class="brutal bg-paper text-ink p-4 max-w-sm">
-        <p class="text-xs font-bold uppercase mb-1">Wyjaśnienie</p>
-        <p class="font-medium leading-snug">{{ lockFeedback.explanation }}</p>
+      <p class="text-5xl font-extrabold tabular-nums mb-2">{{ lockFeedback.countdown.toFixed(1) }}s...</p>
+      <p class="text-3xl font-extrabold mb-4">-50 pkt! PUŁAPKA!</p>
+      <div class="rounded-2xl bg-white text-gray-800 p-4 max-w-sm shadow-xl">
+        <p class="text-xs font-extrabold uppercase text-flame mb-1">Wyjaśnienie</p>
+        <p class="font-bold leading-snug">{{ lockFeedback.explanation }}</p>
       </div>
     </div>
   </div>
@@ -410,11 +399,11 @@
   <script>
     const { createApp, ref, computed, onMounted, onUnmounted } = Vue;
     const STORAGE_KEY = 'ft_player_session';
-    const SWIPE_THRESHOLD = 110;
+    const SWIPE_THRESHOLD = 100;
 
     createApp({
       setup() {
-        const stage = ref('join'); // join | waiting | play | finished
+        const stage = ref('join');
         const pinInput = ref('');
         const nickInput = ref('');
         const nick = ref('');
@@ -437,9 +426,11 @@
         const lockFeedback = ref(null);
 
         const dragX = ref(0);
+        const dragY = ref(0);
         const dragging = ref(false);
         const cardAnimating = ref(false);
         let dragStartX = 0;
+        let dragStartY = 0;
         let pointerActive = false;
         let ws = null;
         let lockTimer = null;
@@ -452,14 +443,15 @@
           const t = total.value || 15;
           return Math.min(100, Math.round((answered.value / t) * 100));
         });
-        const stampFakt = computed(() => Math.min(1, Math.max(0, dragX.value / 120)));
-        const stampPulapka = computed(() => Math.min(1, Math.max(0, -dragX.value / 120)));
+        const stampFakt = computed(() => Math.min(1, Math.max(0, dragX.value / 90)));
+        const stampPulapka = computed(() => Math.min(1, Math.max(0, -dragX.value / 90)));
         const cardStyle = computed(() => {
           const x = dragX.value;
-          const rot = x / 18;
+          const y = dragY.value;
+          const rot = x / 14;
           return {
-            transform: `translateX(${x}px) rotate(${rot}deg)`,
-            opacity: cardAnimating.value && Math.abs(x) > 200 ? 0 : 1,
+            transform: `translate(${x}px, ${y}px) rotate(${rot}deg)`,
+            opacity: cardAnimating.value && Math.abs(x) > 220 ? 0 : 1,
           };
         });
 
@@ -539,13 +531,21 @@
           return ev.clientX;
         }
 
+        function clientY(ev) {
+          if (ev.touches && ev.touches[0]) return ev.touches[0].clientY;
+          if (ev.changedTouches && ev.changedTouches[0]) return ev.changedTouches[0].clientY;
+          return ev.clientY;
+        }
+
         function onPointerDown(ev) {
           if (busy.value || !currentCard.value) return;
           pointerActive = true;
           dragging.value = true;
           cardAnimating.value = false;
           dragStartX = clientX(ev);
+          dragStartY = clientY(ev);
           dragX.value = 0;
+          dragY.value = 0;
 
           if (ev.type === 'mousedown') {
             mouseMoveHandler = (e) => onPointerMove(e);
@@ -558,9 +558,10 @@
         function onPointerMove(ev) {
           if (!pointerActive || busy.value) return;
           dragX.value = clientX(ev) - dragStartX;
+          dragY.value = (clientY(ev) - dragStartY) * 0.35;
         }
 
-        function onPointerUp(ev) {
+        function onPointerUp() {
           if (!pointerActive) return;
           pointerActive = false;
           dragging.value = false;
@@ -581,17 +582,32 @@
           } else {
             cardAnimating.value = true;
             dragX.value = 0;
+            dragY.value = 0;
           }
         }
 
         function flyOff(dir) {
           cardAnimating.value = true;
-          dragX.value = dir * (window.innerWidth || 400);
+          dragX.value = dir * ((window.innerWidth || 400) * 1.2);
+          dragY.value = dragY.value + 40;
         }
 
         function resetCardPosition() {
           cardAnimating.value = false;
           dragX.value = 0;
+          dragY.value = 0;
+        }
+
+        function tapNope() {
+          if (busy.value || !currentCard.value) return;
+          flyOff(-1);
+          submitAnswer(false);
+        }
+
+        function tapLike() {
+          if (busy.value || !currentCard.value) return;
+          flyOff(1);
+          submitAnswer(true);
         }
 
         function openSocket(pin) {
@@ -621,7 +637,6 @@
             joining.value = false;
             busy.value = false;
             resetCardPosition();
-            // Stary PIN / martwy pokój – wróć do formularza
             if (/nie istnieje|zamknięt|zakończył sesj/i.test(message)) {
               clearSession();
               playerId.value = null;
@@ -655,7 +670,6 @@
               return;
             }
 
-            // lobby (lub oczekiwanie na START)
             stage.value = 'waiting';
             return;
           }
@@ -684,10 +698,7 @@
           }
 
           if (msg.type === 'round_finished') {
-            if (stage.value === 'play') {
-              // Host zakończył wcześniej – pokaż podsumowanie z aktualnym stanem
-              stage.value = 'finished';
-            }
+            if (stage.value === 'play') stage.value = 'finished';
             return;
           }
 
@@ -707,22 +718,16 @@
 
           if (msg.correct) {
             const gained = 100 + (msg.bonus || 0);
-            const pointsLabel = (msg.bonus || 0) > 0
-              ? `+${gained} pkt COMBO!`
-              : `+${gained} pkt`;
-
             okFeedback.value = {
-              pointsLabel,
+              pointsLabel: (msg.bonus || 0) > 0 ? `+${gained} pkt COMBO!` : `+${gained} pkt`,
               explanation: msg.explanation || '',
             };
-
             if (okTimer) clearTimeout(okTimer);
             okTimer = setTimeout(() => {
               okFeedback.value = null;
               advanceAfterAnswer(msg);
             }, 800);
           } else {
-            // Pełny ekran blokady 2.0s
             const endsAt = (msg.locked_until && msg.locked_until > 0)
               ? msg.locked_until * 1000
               : Date.now() + 2000;
@@ -741,10 +746,7 @@
                 lockFeedback.value = null;
                 advanceAfterAnswer(msg);
               } else if (lockFeedback.value) {
-                lockFeedback.value = {
-                  ...lockFeedback.value,
-                  countdown: left,
-                };
+                lockFeedback.value = { ...lockFeedback.value, countdown: left };
               }
             }, 50);
           }
@@ -765,7 +767,6 @@
           if (msg.next_card) {
             cardIndex.value += 1;
             if (!cards.value[cardIndex.value] || cards.value[cardIndex.value].id !== msg.next_card.id) {
-              // Uzupełnij / zsynchronizuj talię
               const next = cards.value.slice(0, cardIndex.value);
               next.push(msg.next_card);
               cards.value = next.concat(cards.value.slice(cardIndex.value + 1));
@@ -793,7 +794,6 @@
             await openSocket(pin);
             const session = loadSession();
             const payload = { action: 'join', nick: name };
-            // player_id tylko przy tym samym PIN + nick (wznowienie), inaczej nowa sesja
             if (session && session.pin === pin && session.nick === name && session.player_id) {
               payload.player_id = session.player_id;
             }
@@ -817,18 +817,14 @@
         async function tryResume() {
           const params = new URLSearchParams(window.location.search);
           const urlPin = params.get('pin');
-          if (urlPin && /^\d{4}$/.test(urlPin)) {
-            pinInput.value = urlPin;
-          }
+          if (urlPin && /^\d{4}$/.test(urlPin)) pinInput.value = urlPin;
 
           const session = loadSession();
           if (session) {
-            // Prefill formularza – zawsze można poprawić PIN / nick
             if (!pinInput.value && session.pin) pinInput.value = session.pin;
             if (session.nick) nickInput.value = session.nick;
           }
 
-          // Auto-wznowienie TYLKO po odświeżeniu play.html (nie po wejściu z index.html)
           const shouldAutoResume =
             isPageReload()
             && session
@@ -837,9 +833,7 @@
             && session.player_id
             && (!urlPin || urlPin === session.pin);
 
-          if (!shouldAutoResume) {
-            return;
-          }
+          if (!shouldAutoResume) return;
 
           pinInput.value = session.pin;
           nickInput.value = session.nick;
@@ -860,10 +854,7 @@
           }
         }
 
-        onMounted(() => {
-          tryResume();
-        });
-
+        onMounted(tryResume);
         onUnmounted(() => {
           if (lockTimer) clearInterval(lockTimer);
           if (okTimer) clearTimeout(okTimer);
@@ -879,8 +870,9 @@
           score, streak, answered, total, currentCard, progressPct,
           finishPlace, finishSeconds, finishBonus,
           busy, okFeedback, lockFeedback,
-          dragX, cardStyle, stampFakt, stampPulapka, cardAnimating,
+          cardStyle, stampFakt, stampPulapka, cardAnimating,
           formatTime, join, submitAnswer, leaveRoom, goHome,
+          tapNope, tapLike,
           onPointerDown, onPointerMove, onPointerUp,
         };
       },

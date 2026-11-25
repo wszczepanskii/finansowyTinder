@@ -3,24 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Finansowy Tinder: Fakt czy Pułapka?</title>
+  <title>Finansowy Tinder</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap" rel="stylesheet" />
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: {
-            display: ['"Archivo Black"', 'sans-serif'],
-            body: ['"Space Grotesk"', 'sans-serif'],
-          },
+          fontFamily: { sans: ['Nunito', 'sans-serif'] },
           colors: {
-            yellow: '#FDE047',
-            lilac: '#C4B5FD',
-            ink: '#111111',
-            paper: '#FFFFFF',
+            flame: '#FD297B',
+            coral: '#FF4458',
+            peach: '#FF6036',
           },
         },
       },
@@ -28,39 +24,50 @@
   </script>
   <style>
     body {
-      font-family: "Space Grotesk", sans-serif;
-      background: #FDE047;
-      color: #111111;
+      font-family: Nunito, sans-serif;
       min-height: 100vh;
+      background: linear-gradient(160deg, #fff 0%, #fff5f7 45%, #ffe8ee 100%);
+      color: #21262e;
     }
-    .font-display { font-family: "Archivo Black", sans-serif; }
-    .brutal { border: 4px solid #111111; box-shadow: 6px 6px 0 #111111; }
-    .choice-card { transition: transform 0.2s ease; }
-    .choice-card:hover { transform: translateY(-4px); }
+    .logo-grad {
+      background: linear-gradient(135deg, #FD297B, #FF6036);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .btn-grad {
+      background: linear-gradient(135deg, #FD297B, #FF6036);
+    }
+    .card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .card-hover:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(253, 41, 123, 0.18);
+    }
   </style>
 </head>
 <body>
-  <main class="min-h-screen flex flex-col items-center justify-center px-5 py-10">
-    <div class="w-full max-w-lg text-center mb-10">
-      <p class="font-bold uppercase tracking-widest text-sm mb-3">OFFLINE STUDIO CHALLENGE</p>
-      <h1 class="font-display text-4xl sm:text-5xl leading-none uppercase mb-3">
-        Finansowy Tinder:<br />Fakt czy Pułapka?
-      </h1>
-      <p class="font-medium text-ink/70 max-w-md mx-auto">
-        Multiplayer na żywo: prowadzący na dużym ekranie, gracze na telefonach.
-      </p>
+  <main class="min-h-screen flex flex-col items-center justify-center px-5 py-12">
+    <div class="w-full max-w-md text-center mb-10">
+      <div class="mx-auto mb-5 w-16 h-16 rounded-full btn-grad flex items-center justify-center shadow-lg shadow-pink-200">
+        <svg viewBox="0 0 24 24" class="w-8 h-8 text-white fill-current" aria-hidden="true">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+      </div>
+      <h1 class="text-4xl sm:text-5xl font-extrabold logo-grad leading-tight">Finansowy Tinder</h1>
+      <p class="mt-2 text-lg font-bold text-gray-500">Fakt czy Pułapka?</p>
+      <p class="mt-4 text-gray-500 font-medium">Swipe’uj twierdzenia finansowe. Multiplayer na żywo.</p>
     </div>
 
-    <div class="w-full max-w-lg grid gap-4 sm:grid-cols-2">
-      <a href="./play.html" class="choice-card brutal block bg-paper p-6 text-left">
-        <span class="inline-block text-xs font-bold uppercase tracking-wider mb-2">Gracz</span>
-        <h2 class="font-display text-2xl uppercase mb-1">Dołącz do gry</h2>
-        <p class="text-sm text-ink/60">Wpisz PIN pokoju i nick – graj na telefonie.</p>
+    <div class="w-full max-w-md grid gap-4">
+      <a href="./play.html" class="card-hover block rounded-2xl bg-white p-6 text-left shadow-md shadow-pink-100 border border-pink-50">
+        <p class="text-flame text-xs font-extrabold uppercase tracking-wider mb-1">Gracz</p>
+        <h2 class="text-2xl font-extrabold mb-1">Dołącz do gry</h2>
+        <p class="text-sm text-gray-500 font-medium">Wpisz PIN i nick — graj na telefonie.</p>
       </a>
-      <a href="./host.html" class="choice-card brutal block bg-lilac p-6 text-left">
-        <span class="inline-block text-xs font-bold uppercase tracking-wider mb-2">Prowadzący</span>
-        <h2 class="font-display text-2xl uppercase mb-1">Ekran hosta</h2>
-        <p class="text-sm text-ink/70">Utwórz pokój, pokaż PIN i ranking na żywo.</p>
+      <a href="./host.html" class="card-hover block rounded-2xl btn-grad p-6 text-left text-white shadow-lg shadow-pink-200">
+        <p class="text-white/80 text-xs font-extrabold uppercase tracking-wider mb-1">Prowadzący</p>
+        <h2 class="text-2xl font-extrabold mb-1">Ekran hosta</h2>
+        <p class="text-sm text-white/80 font-medium">Utwórz pokój, pokaż PIN i ranking na żywo.</p>
       </a>
     </div>
   </main>
