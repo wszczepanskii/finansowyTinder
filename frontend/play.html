@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Graj · Finansowy Tinder</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="./config.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['"Archivo Black"', 'sans-serif'],
+            body: ['"Space Grotesk"', 'sans-serif'],
+          },
+          colors: {
+            yellow: '#FDE047',
+            lilac: '#C4B5FD',
+            ink: '#111111',
+            paper: '#FFFFFF',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      overscroll-behavior: none;
+      touch-action: pan-y;
+    }
+    body {
+      font-family: "Space Grotesk", sans-serif;
+      background: #FDE047;
+      color: #111111;
+      min-height: 100dvh;
+    }
+    .font-display { font-family: "Archivo Black", sans-serif; }
+    .brutal { border: 4px solid #111111; box-shadow: 6px 6px 0 #111111; }
+    .brutal-sm { border: 4px solid #111111; box-shadow: 3px 3px 0 #111111; }
+    #app {
+      height: 100dvh;
+      max-height: 100dvh;
+      overflow: hidden;
+    }
+    .card-stage {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 0.25rem 0.75rem;
+    }
+    .card-stack-bg {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: min(100%, 22rem);
+      height: min(52%, 15.5rem);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .card-stack-bg::before,
+    .card-stack-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: #C4B5FD;
+      border: 4px solid #111111;
+      box-shadow: 4px 4px 0 #111111;
+    }
+    .card-stack-bg::before {
+      transform: rotate(-5deg) translate(-6px, 4px);
+      background: #fff;
+    }
+    .card-stack-bg::after {
+      transform: rotate(4deg) translate(8px, -2px);
+      opacity: 0.85;
+    }
+    .tinder-card {
+      position: relative;
+      z-index: 2;
+      touch-action: none;
+      user-select: none;
+      will-change: transform;
+      width: min(100%, 22rem);
+      max-height: min(48dvh, 17rem);
+      min-height: 11.5rem;
+      display: flex;
+      flex-direction: column;
+      background: #FFFFFF;
+      border: 4px solid #111111;
+      box-shadow: 8px 8px 0 #111111;
+      overflow: hidden;
+    }
+    .tinder-card.animating {
+      transition: transform 0.28s ease, opacity 0.28s ease;
+    }
+    .tinder-card-accent {
+      height: 0.65rem;
+      background: linear-gradient(90deg, #C4B5FD 0%, #FDE047 100%);
+      border-bottom: 4px solid #111111;
+      flex-shrink: 0;
+    }
+    .tinder-card-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 1rem 1.1rem 1.15rem;
+      overflow: hidden;
+    }
+    .tinder-card-label {
+      display: inline-block;
+      align-self: flex-start;
+      background: #111111;
+      color: #FDE047;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.28rem 0.55rem;
+      margin-bottom: 0.75rem;
+    }
+    .tinder-card-text {
+      font-family: "Archivo Black", sans-serif;
+      font-size: clamp(1rem, 3.8vw, 1.2rem);
+      line-height: 1.35;
+      letter-spacing: -0.01em;
+    }
+    .swipe-hint {
+      margin-top: 0.85rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: rgba(17, 17, 17, 0.4);
+    }
+    .stamp {
+      position: absolute;
+      top: 22%;
+      padding: 0.3rem 0.65rem;
+      border: 4px solid currentColor;
+      font-family: "Archivo Black", sans-serif;
+      font-size: 1.35rem;
+      letter-spacing: 0.06em;
+      background: rgba(255, 255, 255, 0.92);
+      transform: rotate(-12deg);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 3;
+    }
+    .stamp-fakt {
+      left: 10%;
+      color: #16a34a;
+    }
+    .stamp-pulapka {
+      right: 10%;
+      color: #dc2626;
+      transform: rotate(12deg);
+    }
+    .play-btn {
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .play-btn:active:not(:disabled) {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 #111111;
+    }
+    .lock-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: #dc2626;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .ok-toast {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #16a34a;
+      color: #fff;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    @keyframes pulse-soft {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.55; }
+    }
+    .waiting { animation: pulse-soft 1.5s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+  <div id="app" class="flex flex-col px-4 py-3 max-w-lg mx-auto w-full">
+
+    <!-- 1. DOŁĄCZANIE -->
+    <section v-if="stage === 'join'" class="flex-1 flex flex-col justify-center overflow-hidden">
+      <a
+        href="./index.html"
+        class="inline-block brutal-sm bg-paper px-3 py-2 mb-4 font-bold uppercase text-xs w-fit"
+      >
+        ← Strona główna
+      </a>
+      <p class="font-bold uppercase tracking-widest text-xs mb-2">OFFLINE STUDIO CHALLENGE</p>
+      <h1 class="font-display text-3xl leading-none uppercase mb-6">
+        Finansowy Tinder
+      </h1>
+
+      <label class="block text-sm font-bold uppercase mb-1">PIN pokoju</label>
+      <input
+        v-model="pinInput"
+        maxlength="4"
+        inputmode="numeric"
+        pattern="[0-9]*"
+        class="brutal-sm bg-paper w-full px-4 py-3 mb-4 text-center font-display text-3xl tracking-[0.35em] outline-none"
+        placeholder="0000"
+      />
+
+      <label class="block text-sm font-bold uppercase mb-1">Twój nick (max 16)</label>
+      <input
+        v-model="nickInput"
+        maxlength="16"
+        class="brutal-sm bg-paper w-full px-4 py-3 mb-4 outline-none font-bold"
+        placeholder="np. Ania"
+        @keyup.enter="join"
+      />
+
+      <p v-if="formError" class="brutal-sm bg-red-600 text-white px-3 py-2 mb-4 text-sm font-bold">
+        {{ formError }}
+      </p>
+
+      <button
+        @click="join"
+        :disabled="joining"
+        class="brutal bg-lilac w-full py-4 font-display text-xl uppercase disabled:opacity-50"
+      >
+        {{ joining ? 'Łączenie…' : 'Dołącz do gry' }}
+      </button>
+    </section>
+
+    <!-- 2. POCZEKALNIA -->
+    <section v-else-if="stage === 'waiting'" class="flex-1 flex flex-col justify-center overflow-hidden">
+      <button
+        type="button"
+        @click="goHome"
+        class="brutal-sm bg-paper px-3 py-2 mb-4 font-bold uppercase text-xs w-fit"
+      >
+        ← Strona główna
+      </button>
+      <p class="waiting font-display text-2xl uppercase leading-tight mb-3">
+        Jesteś w grze, {{ nick }}!
+      </p>
+      <p class="font-medium mb-8">Czekamy na start prowadzącego...</p>
+
+      <div class="brutal bg-paper p-5 space-y-4 mb-4">
+        <p class="font-display text-sm uppercase tracking-wide">Ściągawka</p>
+        <div class="flex items-center gap-3">
+          <span class="brutal-sm bg-red-500 text-white px-3 py-2 font-display text-sm shrink-0">← LEWO</span>
+          <span class="font-bold">= PUŁAPKA</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="brutal-sm bg-green-500 text-white px-3 py-2 font-display text-sm shrink-0">PRAWO →</span>
+          <span class="font-bold">= FAKT</span>
+        </div>
+        <p class="text-sm text-ink/70">Przesuń kartę albo użyj przycisków.</p>
+      </div>
+
+      <button
+        @click="leaveRoom"
+        class="brutal-sm bg-paper w-full py-3 font-bold uppercase text-sm"
+      >
+        Zmień pokój / PIN
+      </button>
+    </section>
+
+    <!-- 3. ROZGRYWKA -->
+    <section v-else-if="stage === 'play'" class="flex-1 flex flex-col min-h-0 overflow-hidden">
+      <header class="flex items-center justify-between gap-2 mb-2 shrink-0">
+        <div class="brutal-sm bg-paper px-3 py-2">
+          <p class="text-[0.65rem] font-bold uppercase tracking-widest text-ink/50">Postęp</p>
+          <p class="font-display text-sm leading-none mt-0.5">Karta {{ Math.min(answered + 1, total) }} / {{ total }}</p>
+          <div class="mt-1.5 h-2.5 w-28 border-[3px] border-black bg-lilac/25 overflow-hidden">
+            <div class="h-full bg-lilac" :style="{ width: progressPct + '%' }"></div>
+          </div>
+        </div>
+        <div class="brutal-sm bg-lilac px-3 py-2 text-right min-w-[5.5rem]">
+          <p class="font-display text-2xl leading-none">{{ score }}</p>
+          <p class="text-[0.65rem] font-bold uppercase">pkt</p>
+          <p v-if="streak > 0" class="text-xs font-bold mt-1">🔥 {{ streak }}</p>
+        </div>
+      </header>
+
+      <div class="card-stage">
+        <div class="card-stack-bg" aria-hidden="true"></div>
+        <div
+          class="tinder-card"
+          :class="{ animating: cardAnimating }"
+          :style="cardStyle"
+          @touchstart.prevent="onPointerDown"
+          @touchmove.prevent="onPointerMove"
+          @touchend.prevent="onPointerUp"
+          @mousedown.prevent="onPointerDown"
+        >
+          <div class="tinder-card-accent"></div>
+          <div class="tinder-card-body">
+            <span class="tinder-card-label">Twierdzenie</span>
+            <p class="tinder-card-text">{{ currentCard ? currentCard.statement : '' }}</p>
+            <p class="swipe-hint">← pułapka · fakt →</p>
+          </div>
+
+          <div class="stamp stamp-fakt" :style="{ opacity: stampFakt }">FAKT</div>
+          <div class="stamp stamp-pulapka" :style="{ opacity: stampPulapka }">PUŁAPKA</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 shrink-0 pb-[env(safe-area-inset-bottom)]">
+        <button
+          @click="submitAnswer(false)"
+          :disabled="busy"
+          class="play-btn brutal-sm bg-red-500 text-white py-3.5 font-display text-base uppercase disabled:opacity-40"
+        >
+          ❌ Pułapka
+        </button>
+        <button
+          @click="submitAnswer(true)"
+          :disabled="busy"
+          class="play-btn brutal-sm bg-green-500 text-white py-3.5 font-display text-base uppercase disabled:opacity-40"
+        >
+          ✅ Fakt
+        </button>
+      </div>
+    </section>
+
+    <!-- 4. EKRAN KOŃCOWY -->
+    <section v-else-if="stage === 'finished'" class="flex-1 flex flex-col justify-center overflow-hidden text-center">
+      <p class="font-bold uppercase tracking-widest text-xs mb-2">Koniec talii</p>
+      <h2 class="font-display text-4xl uppercase mb-6">Brawo, {{ nick }}!</h2>
+
+      <div class="brutal bg-paper p-5 mb-4 text-left space-y-3">
+        <div class="flex justify-between items-baseline">
+          <span class="font-bold">Punkty</span>
+          <span class="font-display text-3xl">{{ score }}</span>
+        </div>
+        <div class="flex justify-between items-baseline">
+          <span class="font-bold">Czas</span>
+          <span class="font-display text-xl">{{ formatTime(finishSeconds) }}</span>
+        </div>
+        <div v-if="finishBonus > 0" class="flex justify-between items-baseline">
+          <span class="font-bold">Bonus podium {{ finishPlace ? '#' + finishPlace : '' }}</span>
+          <span class="font-display text-xl text-green-700">+{{ finishBonus }}</span>
+        </div>
+        <div v-if="finishPlace && finishPlace <= 3" class="pt-2 border-t-4 border-black">
+          <p class="font-display text-2xl">
+            <span v-if="finishPlace === 1">🥇</span>
+            <span v-else-if="finishPlace === 2">🥈</span>
+            <span v-else>🥉</span>
+            Miejsce {{ finishPlace }}
+          </p>
+        </div>
+      </div>
+
+      <p class="font-medium text-ink/80">
+        Spójrz na ekran główny, aby zobaczyć pełny ranking!
+      </p>
+      <p class="text-sm text-ink/50 mt-4 mb-4">Czekaj na rewanż od prowadzącego…</p>
+      <button
+        @click="leaveRoom"
+        class="brutal-sm bg-paper w-full py-3 font-bold uppercase text-sm"
+      >
+        Dołącz do innego pokoju
+      </button>
+    </section>
+
+    <!-- Poprawna odpowiedź – 0.8s -->
+    <div v-if="okFeedback" class="ok-toast">
+      <p class="font-display text-4xl mb-3">{{ okFeedback.pointsLabel }}</p>
+      <div class="brutal bg-paper text-ink p-4 max-w-sm">
+        <p class="text-xs font-bold uppercase mb-1">Wyjaśnienie</p>
+        <p class="font-medium leading-snug">{{ okFeedback.explanation }}</p>
+      </div>
+    </div>
+
+    <!-- Blokada po błędzie – 2s -->
+    <div v-if="lockFeedback" class="lock-screen">
+      <p class="font-display text-5xl tabular-nums mb-2">{{ lockFeedback.countdown.toFixed(1) }}s...</p>
+      <p class="font-display text-3xl mb-4">-50 pkt! PUŁAPKA!</p>
+      <div class="brutal bg-paper text-ink p-4 max-w-sm">
+        <p class="text-xs font-bold uppercase mb-1">Wyjaśnienie</p>
+        <p class="font-medium leading-snug">{{ lockFeedback.explanation }}</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed, onMounted, onUnmounted } = Vue;
+    const STORAGE_KEY = 'ft_player_session';
+    const SWIPE_THRESHOLD = 110;
+
+    createApp({
+      setup() {
+        const stage = ref('join'); // join | waiting | play | finished
+        const pinInput = ref('');
+        const nickInput = ref('');
+        const nick = ref('');
+        const playerId = ref(null);
+        const formError = ref('');
+        const joining = ref(false);
+
+        const cards = ref([]);
+        const cardIndex = ref(0);
+        const score = ref(0);
+        const streak = ref(0);
+        const answered = ref(0);
+        const total = ref(15);
+        const finishPlace = ref(null);
+        const finishSeconds = ref(null);
+        const finishBonus = ref(0);
+
+        const busy = ref(false);
+        const okFeedback = ref(null);
+        const lockFeedback = ref(null);
+
+        const dragX = ref(0);
+        const dragging = ref(false);
+        const cardAnimating = ref(false);
+        let dragStartX = 0;
+        let pointerActive = false;
+        let ws = null;
+        let lockTimer = null;
+        let okTimer = null;
+        let mouseMoveHandler = null;
+        let mouseUpHandler = null;
+
+        const currentCard = computed(() => cards.value[cardIndex.value] || null);
+        const progressPct = computed(() => {
+          const t = total.value || 15;
+          return Math.min(100, Math.round((answered.value / t) * 100));
+        });
+        const stampFakt = computed(() => Math.min(1, Math.max(0, dragX.value / 120)));
+        const stampPulapka = computed(() => Math.min(1, Math.max(0, -dragX.value / 120)));
+        const cardStyle = computed(() => {
+          const x = dragX.value;
+          const rot = x / 18;
+          return {
+            transform: `translateX(${x}px) rotate(${rot}deg)`,
+            opacity: cardAnimating.value && Math.abs(x) > 200 ? 0 : 1,
+          };
+        });
+
+        function formatTime(seconds) {
+          if (seconds == null || Number.isNaN(Number(seconds))) return '—';
+          const s = Math.max(0, Math.floor(Number(seconds)));
+          const m = Math.floor(s / 60);
+          const r = s % 60;
+          return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
+        }
+
+        function loadSession() {
+          try {
+            const raw = sessionStorage.getItem(STORAGE_KEY);
+            return raw ? JSON.parse(raw) : null;
+          } catch (_) {
+            return null;
+          }
+        }
+
+        function saveSession() {
+          sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+            pin: pinInput.value,
+            nick: nick.value,
+            player_id: playerId.value,
+          }));
+        }
+
+        function clearSession() {
+          sessionStorage.removeItem(STORAGE_KEY);
+        }
+
+        function isPageReload() {
+          try {
+            const nav = performance.getEntriesByType('navigation')[0];
+            if (nav) return nav.type === 'reload';
+          } catch (_) {}
+          try {
+            return performance.navigation && performance.navigation.type === 1;
+          } catch (_) {
+            return false;
+          }
+        }
+
+        function leaveRoom() {
+          if (ws) {
+            try { ws.close(); } catch (_) {}
+            ws = null;
+          }
+          clearSession();
+          playerId.value = null;
+          nick.value = '';
+          cards.value = [];
+          cardIndex.value = 0;
+          score.value = 0;
+          streak.value = 0;
+          answered.value = 0;
+          finishPlace.value = null;
+          finishSeconds.value = null;
+          finishBonus.value = 0;
+          okFeedback.value = null;
+          lockFeedback.value = null;
+          busy.value = false;
+          joining.value = false;
+          formError.value = '';
+          stage.value = 'join';
+        }
+
+        function goHome() {
+          leaveRoom();
+          window.location.href = './index.html';
+        }
+
+        function clientX(ev) {
+          if (ev.touches && ev.touches[0]) return ev.touches[0].clientX;
+          if (ev.changedTouches && ev.changedTouches[0]) return ev.changedTouches[0].clientX;
+          return ev.clientX;
+        }
+
+        function onPointerDown(ev) {
+          if (busy.value || !currentCard.value) return;
+          pointerActive = true;
+          dragging.value = true;
+          cardAnimating.value = false;
+          dragStartX = clientX(ev);
+          dragX.value = 0;
+
+          if (ev.type === 'mousedown') {
+            mouseMoveHandler = (e) => onPointerMove(e);
+            mouseUpHandler = (e) => onPointerUp(e);
+            window.addEventListener('mousemove', mouseMoveHandler);
+            window.addEventListener('mouseup', mouseUpHandler);
+          }
+        }
+
+        function onPointerMove(ev) {
+          if (!pointerActive || busy.value) return;
+          dragX.value = clientX(ev) - dragStartX;
+        }
+
+        function onPointerUp(ev) {
+          if (!pointerActive) return;
+          pointerActive = false;
+          dragging.value = false;
+          if (mouseMoveHandler) {
+            window.removeEventListener('mousemove', mouseMoveHandler);
+            window.removeEventListener('mouseup', mouseUpHandler);
+            mouseMoveHandler = null;
+            mouseUpHandler = null;
+          }
+
+          const x = dragX.value;
+          if (x > SWIPE_THRESHOLD) {
+            flyOff(1);
+            submitAnswer(true);
+          } else if (x < -SWIPE_THRESHOLD) {
+            flyOff(-1);
+            submitAnswer(false);
+          } else {
+            cardAnimating.value = true;
+            dragX.value = 0;
+          }
+        }
+
+        function flyOff(dir) {
+          cardAnimating.value = true;
+          dragX.value = dir * (window.innerWidth || 400);
+        }
+
+        function resetCardPosition() {
+          cardAnimating.value = false;
+          dragX.value = 0;
+        }
+
+        function openSocket(pin) {
+          return new Promise((resolve, reject) => {
+            if (ws) {
+              try { ws.close(); } catch (_) {}
+            }
+            ws = new WebSocket(getWsUrl(`/ws/play/${pin}`));
+            ws.onopen = () => resolve();
+            ws.onerror = () => reject(new Error('Brak połączenia z serwerem. Sprawdź config.js / Render.'));
+            ws.onclose = () => {
+              if (stage.value !== 'join') {
+                formError.value = 'Rozłączono. Odśwież stronę, aby wrócić do gry.';
+              }
+            };
+            ws.onmessage = onMessage;
+          });
+        }
+
+        function onMessage(ev) {
+          let msg;
+          try { msg = JSON.parse(ev.data); } catch (_) { return; }
+
+          if (msg.type === 'error') {
+            const message = msg.message || 'Błąd';
+            formError.value = message;
+            joining.value = false;
+            busy.value = false;
+            resetCardPosition();
+            // Stary PIN / martwy pokój – wróć do formularza
+            if (/nie istnieje|zamknięt|zakończył sesj/i.test(message)) {
+              clearSession();
+              playerId.value = null;
+              stage.value = 'join';
+            }
+            return;
+          }
+
+          if (msg.type === 'joined') {
+            joining.value = false;
+            playerId.value = msg.player_id;
+            nick.value = msg.nick;
+            score.value = msg.score || 0;
+            saveSession();
+
+            if (
+              msg.phase === 'finished'
+              || msg.finished
+              || (msg.phase === 'playing' && msg.cards && msg.cards.length === 0 && msg.answered >= (msg.total || 0))
+            ) {
+              stage.value = 'finished';
+              return;
+            }
+
+            if (msg.phase === 'playing' && msg.cards && msg.cards.length) {
+              cards.value = msg.cards;
+              cardIndex.value = 0;
+              answered.value = msg.answered || 0;
+              total.value = msg.total || msg.cards.length + (msg.answered || 0);
+              stage.value = 'play';
+              return;
+            }
+
+            // lobby (lub oczekiwanie na START)
+            stage.value = 'waiting';
+            return;
+          }
+
+          if (msg.type === 'game_started' || msg.type === 'new_round') {
+            cards.value = msg.cards || [];
+            cardIndex.value = 0;
+            score.value = msg.score || 0;
+            streak.value = 0;
+            answered.value = 0;
+            total.value = cards.value.length || 15;
+            finishPlace.value = null;
+            finishSeconds.value = null;
+            finishBonus.value = 0;
+            okFeedback.value = null;
+            lockFeedback.value = null;
+            busy.value = false;
+            resetCardPosition();
+            stage.value = 'play';
+            return;
+          }
+
+          if (msg.type === 'answer_result') {
+            handleAnswerResult(msg);
+            return;
+          }
+
+          if (msg.type === 'round_finished') {
+            if (stage.value === 'play') {
+              // Host zakończył wcześniej – pokaż podsumowanie z aktualnym stanem
+              stage.value = 'finished';
+            }
+            return;
+          }
+
+          if (msg.type === 'host_disconnected') {
+            clearSession();
+            playerId.value = null;
+            formError.value = 'Host zakończył sesję. Dołącz ponownie z nowym PIN-em.';
+            stage.value = 'join';
+          }
+        }
+
+        function handleAnswerResult(msg) {
+          score.value = msg.score;
+          streak.value = msg.streak;
+          answered.value = msg.answered;
+          total.value = msg.total || total.value;
+
+          if (msg.correct) {
+            const gained = 100 + (msg.bonus || 0);
+            const pointsLabel = (msg.bonus || 0) > 0
+              ? `+${gained} pkt COMBO!`
+              : `+${gained} pkt`;
+
+            okFeedback.value = {
+              pointsLabel,
+              explanation: msg.explanation || '',
+            };
+
+            if (okTimer) clearTimeout(okTimer);
+            okTimer = setTimeout(() => {
+              okFeedback.value = null;
+              advanceAfterAnswer(msg);
+            }, 800);
+          } else {
+            // Pełny ekran blokady 2.0s
+            const endsAt = (msg.locked_until && msg.locked_until > 0)
+              ? msg.locked_until * 1000
+              : Date.now() + 2000;
+
+            lockFeedback.value = {
+              explanation: msg.explanation || '',
+              countdown: Math.max(0, (endsAt - Date.now()) / 1000),
+            };
+
+            if (lockTimer) clearInterval(lockTimer);
+            lockTimer = setInterval(() => {
+              const left = (endsAt - Date.now()) / 1000;
+              if (left <= 0) {
+                clearInterval(lockTimer);
+                lockTimer = null;
+                lockFeedback.value = null;
+                advanceAfterAnswer(msg);
+              } else if (lockFeedback.value) {
+                lockFeedback.value = {
+                  ...lockFeedback.value,
+                  countdown: left,
+                };
+              }
+            }, 50);
+          }
+        }
+
+        function advanceAfterAnswer(msg) {
+          busy.value = false;
+          resetCardPosition();
+
+          if (msg.finished) {
+            finishPlace.value = msg.finish_place;
+            finishSeconds.value = msg.finish_seconds;
+            finishBonus.value = msg.finish_bonus || 0;
+            stage.value = 'finished';
+            return;
+          }
+
+          if (msg.next_card) {
+            cardIndex.value += 1;
+            if (!cards.value[cardIndex.value] || cards.value[cardIndex.value].id !== msg.next_card.id) {
+              // Uzupełnij / zsynchronizuj talię
+              const next = cards.value.slice(0, cardIndex.value);
+              next.push(msg.next_card);
+              cards.value = next.concat(cards.value.slice(cardIndex.value + 1));
+            }
+          } else {
+            cardIndex.value += 1;
+          }
+        }
+
+        async function join() {
+          formError.value = '';
+          const pin = (pinInput.value || '').trim();
+          const name = (nickInput.value || '').trim();
+          if (!/^\d{4}$/.test(pin)) {
+            formError.value = 'PIN musi mieć 4 cyfry.';
+            return;
+          }
+          if (!name || name.length > 16) {
+            formError.value = 'Nick: 1–16 znaków.';
+            return;
+          }
+
+          joining.value = true;
+          try {
+            await openSocket(pin);
+            const session = loadSession();
+            const payload = { action: 'join', nick: name };
+            // player_id tylko przy tym samym PIN + nick (wznowienie), inaczej nowa sesja
+            if (session && session.pin === pin && session.nick === name && session.player_id) {
+              payload.player_id = session.player_id;
+            }
+            ws.send(JSON.stringify(payload));
+          } catch (e) {
+            joining.value = false;
+            formError.value = e.message || 'Błąd połączenia.';
+          }
+        }
+
+        function submitAnswer(isFact) {
+          if (!currentCard.value || busy.value || lockFeedback.value || okFeedback.value) return;
+          busy.value = true;
+          ws.send(JSON.stringify({
+            action: 'answer',
+            card_id: currentCard.value.id,
+            answer: isFact,
+          }));
+        }
+
+        async function tryResume() {
+          const params = new URLSearchParams(window.location.search);
+          const urlPin = params.get('pin');
+          if (urlPin && /^\d{4}$/.test(urlPin)) {
+            pinInput.value = urlPin;
+          }
+
+          const session = loadSession();
+          if (session) {
+            // Prefill formularza – zawsze można poprawić PIN / nick
+            if (!pinInput.value && session.pin) pinInput.value = session.pin;
+            if (session.nick) nickInput.value = session.nick;
+          }
+
+          // Auto-wznowienie TYLKO po odświeżeniu play.html (nie po wejściu z index.html)
+          const shouldAutoResume =
+            isPageReload()
+            && session
+            && session.pin
+            && session.nick
+            && session.player_id
+            && (!urlPin || urlPin === session.pin);
+
+          if (!shouldAutoResume) {
+            return;
+          }
+
+          pinInput.value = session.pin;
+          nickInput.value = session.nick;
+          playerId.value = session.player_id;
+          joining.value = true;
+          try {
+            await openSocket(session.pin);
+            ws.send(JSON.stringify({
+              action: 'join',
+              nick: session.nick,
+              player_id: session.player_id,
+            }));
+          } catch (e) {
+            joining.value = false;
+            clearSession();
+            formError.value = e.message || 'Nie udało się wznowić sesji. Dołącz ponownie.';
+            stage.value = 'join';
+          }
+        }
+
+        onMounted(() => {
+          tryResume();
+        });
+
+        onUnmounted(() => {
+          if (lockTimer) clearInterval(lockTimer);
+          if (okTimer) clearTimeout(okTimer);
+          if (mouseMoveHandler) {
+            window.removeEventListener('mousemove', mouseMoveHandler);
+            window.removeEventListener('mouseup', mouseUpHandler);
+          }
+          if (ws) ws.close();
+        });
+
+        return {
+          stage, pinInput, nickInput, nick, formError, joining,
+          score, streak, answered, total, currentCard, progressPct,
+          finishPlace, finishSeconds, finishBonus,
+          busy, okFeedback, lockFeedback,
+          dragX, cardStyle, stampFakt, stampPulapka, cardAnimating,
+          formatTime, join, submitAnswer, leaveRoom, goHome,
+          onPointerDown, onPointerMove, onPointerUp,
+        };
+      },
+    }).mount('#app');
+  </script>
+</body>
+</html>

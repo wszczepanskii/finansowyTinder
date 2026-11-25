@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Host · Finansowy Tinder</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="./config.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['"Archivo Black"', 'sans-serif'],
+            body: ['"Space Grotesk"', 'sans-serif'],
+          },
+          colors: {
+            yellow: '#FDE047',
+            lilac: '#C4B5FD',
+            ink: '#111111',
+            paper: '#FFFFFF',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      font-family: "Space Grotesk", sans-serif;
+      background: #FDE047;
+      color: #111111;
+      min-height: 100vh;
+    }
+    .font-display { font-family: "Archivo Black", sans-serif; }
+    .brutal { border: 4px solid #111111; box-shadow: 6px 6px 0 #111111; }
+    .brutal-sm { border: 4px solid #111111; box-shadow: 3px 3px 0 #111111; }
+    .bar-fill { transition: width 0.35s ease; }
+    #qrcode img, #qrcode canvas { display: block; margin: 0 auto; }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+    .dot-wake { animation: blink 1.1s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+  <div id="app" class="min-h-screen p-4 sm:p-6 lg:p-8">
+
+    <!-- LOBBY -->
+    <section v-if="view === 'lobby'" class="max-w-6xl mx-auto">
+      <header class="mb-6 sm:mb-8">
+        <a
+          href="./index.html"
+          class="inline-block brutal-sm bg-paper px-4 py-2 mb-4 font-bold uppercase text-sm hover:-translate-y-0.5 transition"
+        >
+          ← Strona główna
+        </a>
+        <p class="font-bold uppercase tracking-widest text-sm mb-2">OFFLINE STUDIO CHALLENGE</p>
+        <h1 class="font-display text-3xl sm:text-5xl lg:text-6xl leading-none uppercase">
+          Finansowy Tinder:<br />Fakt czy Pułapka?
+        </h1>
+      </header>
+
+      <div class="flex items-center gap-3 mb-6 brutal-sm bg-paper px-4 py-3 w-fit">
+        <span
+          class="inline-block w-3.5 h-3.5 rounded-full border-2 border-black"
+          :class="connected ? 'bg-green-500' : 'bg-yellow-300 dot-wake'"
+        ></span>
+        <span class="font-bold text-sm sm:text-base">
+          {{ connected ? 'Połączono z serwerem' : 'Wybudzanie serwera...' }}
+        </span>
+      </div>
+
+      <div v-if="fatalError" class="brutal bg-paper p-6 mb-6 max-w-xl">
+        <p class="font-display text-xl mb-2">Błąd połączenia</p>
+        <p class="mb-4">{{ fatalError }}</p>
+        <button @click="connect" class="brutal-sm bg-lilac px-5 py-2 font-bold uppercase hover:translate-x-0.5 hover:translate-y-0.5 transition">
+          Połącz ponownie
+        </button>
+      </div>
+
+      <div class="grid lg:grid-cols-[320px_1fr] gap-6 items-start">
+        <!-- QR + PIN -->
+        <aside class="brutal bg-paper p-5 flex flex-col items-center text-center">
+          <p class="font-bold uppercase text-sm mb-3 tracking-wide">Zeskanuj i dołącz</p>
+          <div id="qrcode" class="border-4 border-black p-3 bg-white min-h-[200px] min-w-[200px] flex items-center justify-center"></div>
+          <p class="mt-4 text-xs text-ink/60 break-all px-2">{{ playUrl || 'Czekam na PIN…' }}</p>
+          <p class="mt-6 text-xs font-bold uppercase tracking-widest">Kod PIN</p>
+          <p class="font-display text-6xl sm:text-7xl tracking-[0.2em] mt-1">{{ pin || '····' }}</p>
+        </aside>
+
+        <!-- Players + START -->
+        <div>
+          <div class="flex flex-wrap items-end justify-between gap-4 mb-4">
+            <div>
+              <h2 class="font-display text-2xl uppercase">Lobby</h2>
+              <p class="font-medium">Graczy online: {{ players.length }}</p>
+            </div>
+            <button
+              @click="startGame"
+              :disabled="!connected || players.length === 0"
+              class="brutal bg-lilac px-8 py-4 font-display text-xl uppercase disabled:opacity-40 disabled:cursor-not-allowed hover:-translate-y-0.5 transition"
+            >
+              Start gry
+            </button>
+          </div>
+
+          <div v-if="players.length === 0" class="brutal bg-paper p-10 text-center">
+            <p class="font-display text-2xl uppercase mb-2">Czekamy na studentów…</p>
+            <p>Niech zeskanują QR albo wpiszą PIN <strong>{{ pin || '····' }}</strong> na telefonie.</p>
+          </div>
+
+          <div v-else class="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
+            <div
+              v-for="p in players"
+              :key="p.player_id"
+              class="brutal-sm bg-paper px-4 py-3 flex items-center justify-between gap-2"
+              :class="!p.connected ? 'opacity-50' : ''"
+            >
+              <span class="font-display text-lg truncate">{{ p.nick }}</span>
+              <span class="text-xs font-bold uppercase" :class="p.connected ? 'text-green-700' : 'text-red-600'">
+                {{ p.connected ? 'online' : 'offline' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WYŚCIG NA ŻYWO -->
+    <section v-else-if="view === 'race'" class="max-w-5xl mx-auto">
+      <header class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div>
+          <p class="font-bold uppercase tracking-widest text-sm">Wyścig na żywo</p>
+          <h1 class="font-display text-3xl sm:text-4xl uppercase">Fakt czy Pułapka?</h1>
+        </div>
+        <div class="brutal bg-paper px-6 py-3 text-center">
+          <p class="text-xs font-bold uppercase tracking-widest">Czas gry</p>
+          <p class="font-display text-4xl tabular-nums">{{ timerLabel }}</p>
+        </div>
+      </header>
+
+      <div class="flex justify-end mb-4">
+        <button
+          @click="endRound"
+          class="brutal-sm bg-paper px-5 py-3 font-bold uppercase hover:bg-lilac transition"
+        >
+          Zakończ rundę teraz
+        </button>
+      </div>
+
+      <ol class="space-y-3">
+        <li
+          v-for="(p, idx) in racePlayers"
+          :key="p.player_id"
+          class="brutal bg-paper p-4 sm:p-5"
+        >
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="font-display text-2xl w-10 shrink-0">
+                <template v-if="p.finished && p.finish_place === 1">🥇</template>
+                <template v-else-if="p.finished && p.finish_place === 2">🥈</template>
+                <template v-else-if="p.finished && p.finish_place === 3">🥉</template>
+                <template v-else>#{{ idx + 1 }}</template>
+              </span>
+              <div class="min-w-0">
+                <p class="font-display text-xl sm:text-2xl truncate">
+                  {{ p.nick }}
+                  <span v-if="p.streak >= 3" title="Seria" class="ml-1">🔥</span>
+                </p>
+                <p class="text-sm font-medium text-ink/60">
+                  {{ p.answered }} / {{ p.total || 15 }} kart
+                  <span v-if="p.streak >= 3"> · seria ×{{ p.streak }}</span>
+                  <span v-if="!p.connected"> · offline</span>
+                </p>
+              </div>
+            </div>
+            <p class="font-display text-3xl shrink-0">{{ p.score }}</p>
+          </div>
+          <div class="h-4 border-4 border-black bg-lilac/30 overflow-hidden">
+            <div
+              class="bar-fill h-full bg-lilac"
+              :style="{ width: progressPct(p) + '%' }"
+            ></div>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- PODIUM -->
+    <section v-else class="max-w-5xl mx-auto">
+      <header class="mb-8 text-center">
+        <p class="font-bold uppercase tracking-widest text-sm mb-2">OFFLINE STUDIO CHALLENGE</p>
+        <h1 class="font-display text-4xl sm:text-5xl uppercase">Podium</h1>
+        <p class="mt-2 font-medium">Czas rundy: {{ timerLabel }}</p>
+      </header>
+
+      <!-- TOP 3 -->
+      <div class="grid sm:grid-cols-3 gap-4 mb-8 items-end">
+        <div
+          v-for="slot in podiumSlots"
+          :key="slot.place"
+          class="brutal bg-paper p-5 text-center"
+          :class="slot.place === 1 ? 'sm:order-2 sm:-translate-y-4 bg-lilac' : slot.place === 2 ? 'sm:order-1' : 'sm:order-3'"
+        >
+          <p class="text-4xl mb-2">{{ slot.medal }}</p>
+          <p class="font-display text-2xl truncate">{{ slot.player ? slot.player.nick : '—' }}</p>
+          <p class="font-display text-3xl mt-2">{{ slot.player ? slot.player.score : '—' }}</p>
+          <p class="text-sm font-bold mt-1 text-ink/60">
+            {{ slot.player && slot.player.finish_seconds != null ? formatTime(slot.player.finish_seconds) : '—' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Full table -->
+      <div class="brutal bg-paper overflow-hidden mb-8">
+        <table class="w-full text-left">
+          <thead class="bg-ink text-yellow">
+            <tr>
+              <th class="px-4 py-3 font-display">#</th>
+              <th class="px-4 py-3 font-display">Nick</th>
+              <th class="px-4 py-3 font-display text-right">Karty</th>
+              <th class="px-4 py-3 font-display text-right">Punkty</th>
+              <th class="px-4 py-3 font-display text-right">Czas</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="(p, idx) in resultsTable"
+              :key="p.player_id"
+              class="border-t-4 border-black"
+              :class="idx % 2 === 0 ? 'bg-paper' : 'bg-lilac/30'"
+            >
+              <td class="px-4 py-3 font-bold">
+                <span v-if="p.finish_place === 1">🥇</span>
+                <span v-else-if="p.finish_place === 2">🥈</span>
+                <span v-else-if="p.finish_place === 3">🥉</span>
+                <span v-else>{{ idx + 1 }}</span>
+              </td>
+              <td class="px-4 py-3 font-display">{{ p.nick }}</td>
+              <td class="px-4 py-3 text-right font-medium">{{ p.answered }}/{{ p.total || 15 }}</td>
+              <td class="px-4 py-3 text-right font-display text-xl">{{ p.score }}</td>
+              <td class="px-4 py-3 text-right font-medium">
+                {{ p.finish_seconds != null ? formatTime(p.finish_seconds) : '—' }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex justify-center">
+        <button
+          @click="rematch"
+          class="brutal bg-lilac px-8 py-4 font-display text-xl uppercase hover:-translate-y-0.5 transition"
+        >
+          Zagraj rewanż (nowe 15 kart)
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const { createApp, ref, computed, watch, nextTick, onMounted, onUnmounted } = Vue;
+
+    createApp({
+      setup() {
+        const pin = ref(null);
+        const players = ref([]);
+        const phase = ref('lobby');
+        const connected = ref(false);
+        const waking = ref(true);
+        const fatalError = ref(null);
+        const startedAt = ref(null);
+        const elapsedMs = ref(0);
+        const playUrl = ref('');
+
+        let ws = null;
+        let timerId = null;
+        let qrInstance = null;
+        let intentionallyClosed = false;
+
+        const view = computed(() => {
+          if (phase.value === 'playing') return 'race';
+          if (phase.value === 'finished') return 'podium';
+          return 'lobby';
+        });
+
+        const racePlayers = computed(() => {
+          return [...players.value].sort((a, b) => {
+            if (b.answered !== a.answered) return b.answered - a.answered;
+            if (b.score !== a.score) return b.score - a.score;
+            const fa = a.finish_place ?? 999;
+            const fb = b.finish_place ?? 999;
+            return fa - fb;
+          });
+        });
+
+        const resultsTable = computed(() => {
+          return [...players.value].sort((a, b) => {
+            if (b.score !== a.score) return b.score - a.score;
+            const fa = a.finish_place ?? 999;
+            const fb = b.finish_place ?? 999;
+            if (fa !== fb) return fa - fb;
+            return (a.nick || '').localeCompare(b.nick || '', 'pl');
+          });
+        });
+
+        const podiumSlots = computed(() => {
+          const byPlace = (place) =>
+            players.value.find((p) => p.finish_place === place)
+            || resultsTable.value[place - 1]
+            || null;
+          return [
+            { place: 2, medal: '🥈', player: byPlace(2) },
+            { place: 1, medal: '🥇', player: byPlace(1) },
+            { place: 3, medal: '🥉', player: byPlace(3) },
+          ];
+        });
+
+        const timerLabel = computed(() => formatTime(elapsedMs.value / 1000));
+
+        function formatTime(seconds) {
+          if (seconds == null || Number.isNaN(seconds)) return '—';
+          const s = Math.max(0, Math.floor(seconds));
+          const m = Math.floor(s / 60);
+          const r = s % 60;
+          return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
+        }
+
+        function progressPct(p) {
+          const total = p.total || 15;
+          if (!total) return 0;
+          return Math.min(100, Math.round((p.answered / total) * 100));
+        }
+
+        function stopTimer() {
+          if (timerId) {
+            clearInterval(timerId);
+            timerId = null;
+          }
+        }
+
+        function startTimer(fromEpoch) {
+          stopTimer();
+          const start = fromEpoch ? fromEpoch * 1000 : Date.now();
+          startedAt.value = start;
+          const tick = () => {
+            elapsedMs.value = Date.now() - start;
+          };
+          tick();
+          timerId = setInterval(tick, 200);
+        }
+
+        function renderQr(code) {
+          if (!code) return;
+          const url = new URL('./play.html?pin=' + code, window.location.href).href;
+          playUrl.value = url;
+          nextTick(() => {
+            const el = document.getElementById('qrcode');
+            if (!el) return;
+            el.innerHTML = '';
+            qrInstance = new QRCode(el, {
+              text: url,
+              width: 200,
+              height: 200,
+              colorDark: '#111111',
+              colorLight: '#FFFFFF',
+              correctLevel: QRCode.CorrectLevel.M,
+            });
+          });
+        }
+
+        function connect() {
+          fatalError.value = null;
+          waking.value = true;
+          connected.value = false;
+          intentionallyClosed = false;
+
+          if (ws) {
+            try { ws.close(); } catch (_) {}
+          }
+
+          ws = new WebSocket(getWsUrl('/ws/host'));
+
+          ws.onopen = () => {
+            connected.value = true;
+            waking.value = false;
+          };
+
+          ws.onmessage = (ev) => {
+            let msg;
+            try { msg = JSON.parse(ev.data); } catch (_) { return; }
+
+            if (msg.type === 'room_created') {
+              const nextPin = msg.pin;
+              if (nextPin !== pin.value) {
+                pin.value = nextPin;
+                renderQr(nextPin);
+              }
+            }
+
+            if (msg.type === 'state') {
+              const nextPin = msg.pin || pin.value;
+              if (nextPin && nextPin !== pin.value) {
+                pin.value = nextPin;
+                renderQr(nextPin);
+              }
+              const prev = phase.value;
+              phase.value = msg.phase || 'lobby';
+              players.value = msg.players || [];
+
+              if (phase.value === 'playing' && prev !== 'playing') {
+                startTimer(msg.started_at || null);
+              }
+              if (phase.value === 'finished' && prev !== 'finished') {
+                stopTimer();
+                if (startedAt.value) {
+                  elapsedMs.value = Date.now() - startedAt.value;
+                } else if (msg.started_at) {
+                  elapsedMs.value = Date.now() - msg.started_at * 1000;
+                }
+              }
+              if (phase.value === 'lobby' && prev !== 'lobby') {
+                stopTimer();
+                elapsedMs.value = 0;
+              }
+            }
+
+            if (msg.type === 'error') {
+              console.warn(msg.message);
+            }
+          };
+
+          ws.onclose = () => {
+            connected.value = false;
+            if (!intentionallyClosed && !fatalError.value) {
+              fatalError.value = 'Połączenie zostało zamknięte. Sprawdź backend lub spróbuj ponownie (Render może się budzić).';
+              waking.value = true;
+            }
+          };
+
+          ws.onerror = () => {
+            waking.value = true;
+            fatalError.value = 'Nie można połączyć z backendem. Sprawdź BACKEND_HTTP_URL w config.js (darmowy Render budzi się ~30–60 s).';
+          };
+        }
+
+        function send(payload) {
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify(payload));
+          }
+        }
+
+        function startGame() {
+          send({ action: 'start' });
+        }
+
+        function endRound() {
+          send({ action: 'end_round' });
+        }
+
+        function rematch() {
+          send({ action: 'new_round' });
+        }
+
+        watch(pin, (code) => {
+          if (code && view.value === 'lobby') renderQr(code);
+        });
+
+        watch(view, (v) => {
+          if (v === 'lobby' && pin.value) {
+            nextTick(() => renderQr(pin.value));
+          }
+        });
+
+        onMounted(connect);
+        onUnmounted(() => {
+          intentionallyClosed = true;
+          stopTimer();
+          if (ws) ws.close();
+        });
+
+        return {
+          pin, players, phase, connected, waking, fatalError, playUrl,
+          view, racePlayers, resultsTable, podiumSlots, timerLabel,
+          formatTime, progressPct, connect, startGame, endRound, rematch,
+        };
+      },
+    }).mount('#app');
+  </script>
+</body>
+</html>
